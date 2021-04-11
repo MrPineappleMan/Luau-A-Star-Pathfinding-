@@ -1,2 +1,3 @@
-# LuauChess
-A chess game written in Luau
+# Luau2DEngine
+A grid based 2D "engine"
+
