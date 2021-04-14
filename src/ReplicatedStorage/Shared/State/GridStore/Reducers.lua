@@ -17,7 +17,7 @@ end
 
 function ReducerFuncs.Highlight(state, action)
     local newState = shallowCopyState(state)
-    local target = action.position
+    local target = action.target
 
     newState[target.X][target.Y].Highlighted = true
 

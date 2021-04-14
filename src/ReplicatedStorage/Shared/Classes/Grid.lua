@@ -1,6 +1,6 @@
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local Tile = require(script.Parent.Tile)
-local GridState = require(Knit.Shared.State.GridStore.Reducers)
+local GridStore = require(Knit.Shared.State.GridStore)
 local GridActions = require(Knit.Shared.State.GridStore.Actions)
 
 local Grid = {}
@@ -22,7 +22,7 @@ function Grid.new(size: Vector2)
         end
     end
     warn(self.State)
-    self.State = GridState.new(self.State)
+    self.State = GridStore.new(self.State)
 
     self:Highlight(Vector2.new(5,5))
     warn(self.State:getState()[5][5])
