@@ -10,6 +10,7 @@ Grid.__index = Grid
 function Grid.new(size: Vector2)
     local self = setmetatable({
         ["State"] = {},
+        ["Size"] = size,
     }, Grid)
     local sizeX = size.X
     local sizeY = size.Y    
