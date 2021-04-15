@@ -9,29 +9,30 @@ Grid.__index = Grid
 
 function Grid.new(size: Vector2)
     local self = setmetatable({
-        ["State"] = {},
+        ["Store"] = {},
         ["Size"] = size,
     }, Grid)
     local sizeX = size.X
     local sizeY = size.Y    
 
     for x = 1,sizeX  do
-        self.State[x] = {}
+        self.Store[x] = {}
         for y = 1,sizeY  do
             local currentPos = Vector2.new(x,y)
-            self.State[x][y] = Tile.new(currentPos)
+            self.Store[x][y] = Tile.new(currentPos)
         end
     end
-    warn(self.State)
-    self.State = GridStore.new(self.State)
+    warn(self.Store)
+    self.Store = GridStore.new(self.Store)
 
-    self:Highlight(Vector2.new(5,5))
-    warn(self.State:getState()[5][5])
+    self:ToggleHighlight(Vector2.new(5,5))
+    warn(self.Store:getState()[5][5])
     return self
 end
 
-function  Grid:Highlight(target)
-    self.State:dispatch(GridActions.Highlight(target))
+function  Grid:ToggleHighlight(target)
+    self.Store:dispatch(GridActions.ToggleHighlight(target))
+    warn(self.Store:getState()[target.X][target.Y])
 end
 
 function Grid:Destroy()

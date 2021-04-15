@@ -15,11 +15,11 @@ local function shallowCopyState(oldState)
 end
 
 
-function ReducerFuncs.Highlight(state, action)
+function ReducerFuncs.ToggleHighlight(state, action)
     local newState = shallowCopyState(state)
     local target = action.target
-
-    newState[target.X][target.Y].Highlighted = true
+    local targetTile = newState[target.X][target.Y]
+    targetTile.Highlighted = not targetTile.Highlighted
 
     return newState
 end

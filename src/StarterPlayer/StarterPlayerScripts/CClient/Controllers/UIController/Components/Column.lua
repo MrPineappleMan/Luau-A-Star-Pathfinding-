@@ -14,17 +14,12 @@ local function determineTileColor(grid,y,offIsEven,columnNum)
         local currentTheme = tileProps["ThemeColor"]
         tileProps["ThemeColor"] = (currentTheme == "TileColor2") and "TileColor1" or "TileColor2"
     end
-
-    local gridTile = grid[columnNum][y]
-    if gridTile.Highlighted then
-        tileProps["ThemeColor"] = "TileHighlightedColor"
-    end
     return tileProps
 end
 
 function Column:render()
     local props = self.props
-    local grid = props.Grid.State:getState()
+    local grid = props.Grid.Store:getState()
     local size = props.Grid.Size
 
     local columnNum = props.ColumnNumber
@@ -37,9 +32,11 @@ function Column:render()
     })
     local offIsEven = (columnNum%2 == 0)
     for y = 1,size.Y do
+
         local tileProps = determineTileColor(grid,y,offIsEven,columnNum)
         tileProps.LayoutOrder = y
-
+        tileProps.Grid = props.Grid
+        tileProps.Position = Vector2.new(columnNum,y)
         children[tostring(y)] = e(Tile,tileProps)
     end
 

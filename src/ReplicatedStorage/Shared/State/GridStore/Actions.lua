@@ -2,9 +2,9 @@ local Knit = require(game:GetService("ReplicatedStorage").Knit)
 
 local BoardActions = {}
 
-function BoardActions.Highlight(target)
+function BoardActions.ToggleHighlight(target)
     return {
-        ["type"] = "Highlight",
+        ["type"] = "ToggleHighlight",
         ["target"] = target,
     }
 end
