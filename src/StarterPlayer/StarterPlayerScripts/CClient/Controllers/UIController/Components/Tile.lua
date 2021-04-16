@@ -1,3 +1,5 @@
+local UserInputService = game:GetService("UserInputService")
+
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local Roact = require(Knit.Shared.Utils.Roact)
 local e = Roact.createElement
@@ -26,7 +28,18 @@ function Tile:render()
         LayoutOrder = self.props.LayoutOrder,
         [Roact.Event.InputBegan] =  function(rbx,input)
             if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                warn("Toggling!")
+                self.props.Grid:ToggleHighlight(self.props.Position)
+            end
+        end,
+        [Roact.Event.MouseEnter] =  function(rbx)
+            local buttonsPressed = UserInputService:GetMouseButtonsPressed()
+            local rightButtonPressed = false
+            for _,input in pairs(buttonsPressed) do
+                if input.UserInputType.Name == "MouseButton2" then
+                    rightButtonPressed = true
+                end
+            end
+            if rightButtonPressed then
                 self.props.Grid:ToggleHighlight(self.props.Position)
             end
         end,
@@ -39,7 +52,6 @@ function Tile:didMount()
         local pos = props.Position
         local newIsHighlighted = newState[pos.X][pos.Y].Highlighted
         if newIsHighlighted ~= self.state.Highlighted then
-            warn(self.state)
             self:setState({
                 ["Highlighted"] = newIsHighlighted
             })

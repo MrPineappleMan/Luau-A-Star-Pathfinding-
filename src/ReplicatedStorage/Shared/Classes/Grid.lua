@@ -22,17 +22,13 @@ function Grid.new(size: Vector2)
             self.Store[x][y] = Tile.new(currentPos)
         end
     end
-    warn(self.Store)
     self.Store = GridStore.new(self.Store)
-
     self:ToggleHighlight(Vector2.new(5,5))
-    warn(self.Store:getState()[5][5])
     return self
 end
 
 function  Grid:ToggleHighlight(target)
     self.Store:dispatch(GridActions.ToggleHighlight(target))
-    warn(self.Store:getState()[target.X][target.Y])
 end
 
 function Grid:Destroy()
