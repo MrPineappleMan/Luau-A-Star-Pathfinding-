@@ -15,13 +15,35 @@ local function shallowCopyState(oldState)
 end
 
 
-function ReducerFuncs.ToggleHighlight(state, action)
+function ReducerFuncs.SetHighlight(state, action,newVal)
     local newState = shallowCopyState(state)
     local target = action.target
     local targetTile = newState[target.X][target.Y]
-    targetTile.Highlighted = not targetTile.Highlighted
+    targetTile.Highlighted = newVal
 
     return newState
 end
+
+function ReducerFuncs.SetAreaHighlight(state, action)
+    local newState = shallowCopyState(state)
+    local target = action.target
+
+    local radius = action.rad
+    for x = -radius, radius,1 do
+        local column = newState[target.X + x]
+        if column then
+            for y = -radius, radius,1 do
+                local tile = column[target.Y + y]
+                local currentPos = Vector2.new(target.X + x,target.Y + y)
+                if tile and ((currentPos - target).Magnitude < radius) then
+                    tile.Highlighted = action.newState
+                end
+            end
+        end
+    end
+
+    return newState
+end
+
 
 return ReducerFuncs

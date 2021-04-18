@@ -11,7 +11,7 @@ function UIController:KnitStart()
     e = Roact.createElement
     Grid = require(script.Components.Grid)
 
-    local test = require(Knit.Shared.Classes.Grid).new(Vector2.new(10,10))
+    local test = require(Knit.Shared.Classes.Grid).new(Vector2.new(100,100))
     Roact.mount(Roact.createElement("ScreenGui",{},{
             ["Grid"] = e(Grid,{Grid = test})
         })

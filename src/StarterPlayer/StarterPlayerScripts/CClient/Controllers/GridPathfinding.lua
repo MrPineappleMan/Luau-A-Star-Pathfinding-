@@ -34,10 +34,52 @@ local function dist(orig: Vector2,target: Vector2)
     return (orig - target).Magnitude
 end
 
+local function getNeighboorPositions(grid: Grid,position: Vector2)
+    local neighboors = {}
+    local origX = position.X
+    local origY = position.Y
+
+    for offX = -1,1,1 do
+        local row = grid[origX + offX]
+        if row then
+            for offY = -1,1,1 do
+                local tile = row[origY + offY]
+                local isSamePos = (origX == 0 and origY == 0)
+                if tile and not isSamePos then
+                    table.insert(neighboors,Vector2.new(origX + offX, origY + offY))
+                end
+            end
+        end
+    end
+    return neighboors
+end
+
+local function checkIfTileIsBlocked(tile)
+    if tile.Highlighted then
+        return true
+    end
+    return false
+end  
+
 local function createNode(current: Vector2,orig: Vector2, target: Vector2)
     return {
-        fCost = dist(current,orig) + dist(current,target) -- G cost + H Cost 
+        gCost = dist(current,orig),
+        fCost = dist(current,orig) + dist(current,target), -- G cost + H Cost 
+        Position = current,
     }
+end
+
+local function getNodeWithLowestCost(open)
+    local currentLowest = math.huge
+
+    for _,node in pairs(open) do
+        local currentFCost = node.fCost
+        if currentFCost < currentLowest then
+            currentLowest = currentFCost
+        end
+    end
+
+    return currentLowest
 end
 
 local function createVec2ID(target: Vector2)
@@ -47,17 +89,41 @@ end
 function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
     local open = {}
     local closed = {}
-    local current = orig
-    open[createVec2ID(current)] = createNode(current, orig, target) 
+    local current = createNode(orig,orig,target)
+    open[createVec2ID(current)] = current --// ID is used because using the vector2 as a key doesn't work...
 
     local currentStep = 0
     while true do
+        current = getNodeWithLowestCost(open)
 
---[[
-        current = node in OPEN with the lowest f_cost
-        remove current from OPEN
-        add current to CLOSED]]
+        local currentPos = current.Position
+        local currentID = createVec2ID(currentPos)
+        open[currentID] = nil
+        closed[currentID] = current
 
+        if currentPos == target then
+            warn("Found!")
+            return open
+        end
+
+        for _,neighbourPos in pairs(getNeighboorPositions(grid,currentPos)) do
+            local neighbourID = createVec2ID(neighbourPos)
+            local neighbourTile = grid[neighbourPos.X][neighbourPos.Y]
+
+            if checkIfTileIsBlocked(neighbourTile) or closed[neighbourID] then
+                continue
+            end
+
+            local newCostToNeighbour = current.gCost + dist(current.Position,neighbourPos)
+            local neighbourGCost = dist(neighbourPos,orig)
+            if newCostToNeighbour < neighbourGCost or not closed[neighbourID] then
+                local neighbourNode = createNode(neighbourPos,orig,target)
+                neighbourNode.Parent = current
+                if not open[neighbourID] then
+                    open[neighbourID] = neighbourNode
+                end
+            end
+        end
         if current == target then
             return --//Path has been found
         end

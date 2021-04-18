@@ -23,12 +23,15 @@ function Grid.new(size: Vector2)
         end
     end
     self.Store = GridStore.new(self.Store)
-    self:ToggleHighlight(Vector2.new(5,5))
     return self
 end
 
-function  Grid:ToggleHighlight(target)
-    self.Store:dispatch(GridActions.ToggleHighlight(target))
+function  Grid:SetHighlight(target,newState)
+    self.Store:dispatch(GridActions.SetHighlight(target))
+end
+
+function Grid:SetAreaHighlight(target,radius,newState)
+    self.Store:dispatch(GridActions.SetAreaHighlight(target,radius,newState))
 end
 
 function Grid:Destroy()

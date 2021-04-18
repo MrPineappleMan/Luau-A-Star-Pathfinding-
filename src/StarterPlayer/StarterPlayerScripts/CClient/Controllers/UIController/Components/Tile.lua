@@ -19,6 +19,38 @@ function Tile:init()
     })
 end
 
+local function checkValidInputs()
+    local buttonsPressed = UserInputService:GetMouseButtonsPressed()
+    local keysPressed = UserInputService:GetKeysPressed()
+    local rightButtonPressed = false
+    local ctrlPressed = false
+
+    for _,input in pairs(buttonsPressed) do
+        if input.UserInputType.Name == "MouseButton2" then
+            rightButtonPressed = true
+        end
+    end
+    for _,input in pairs(keysPressed) do
+        if input.KeyCode == Enum.KeyCode.LeftControl then
+            ctrlPressed = true
+        end
+    end
+
+    return rightButtonPressed, ctrlPressed
+end
+
+function Tile:setAreaTiles()
+    local rightMouseButtonPressed, ctrlPressed = checkValidInputs()
+
+    if rightMouseButtonPressed then
+        if (ctrlPressed) then
+            self.props.Grid:SetAreaHighlight(self.props.Position,5,false)
+        elseif  (not ctrlPressed) then
+            self.props.Grid:SetAreaHighlight(self.props.Position,5,true)
+        end
+    end
+end
+
 function Tile:render()
     return e(Frame,{
         Size = UDim2.new(1,0,1,0),
@@ -27,21 +59,10 @@ function Tile:render()
         ThemeColor = self.state.Highlighted and  "TileHighlightedColor" or self.props.ThemeColor,
         LayoutOrder = self.props.LayoutOrder,
         [Roact.Event.InputBegan] =  function(rbx,input)
-            if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                self.props.Grid:ToggleHighlight(self.props.Position)
-            end
+            self:setAreaTiles()
         end,
         [Roact.Event.MouseEnter] =  function(rbx)
-            local buttonsPressed = UserInputService:GetMouseButtonsPressed()
-            local rightButtonPressed = false
-            for _,input in pairs(buttonsPressed) do
-                if input.UserInputType.Name == "MouseButton2" then
-                    rightButtonPressed = true
-                end
-            end
-            if rightButtonPressed then
-                self.props.Grid:ToggleHighlight(self.props.Position)
-            end
+            self:setAreaTiles()
         end,
     })
 end
