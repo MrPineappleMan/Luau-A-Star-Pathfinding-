@@ -27,31 +27,13 @@
 local RunService = game:GetService("RunService")
 
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
+local Node = require(script.Node)
+local HeapSort = require(script.HeapSort)
 
 local GridPathfinding = Knit.CreateController { Name = "GridPathfinding" }
 
 local function dist(orig: Vector2,target: Vector2)
     return (orig - target).Magnitude
-end
-
-local function getNeighboorPositions(grid: Grid,position: Vector2)
-    local neighboors = {}
-    local origX = position.X
-    local origY = position.Y
-
-    for offX = -1,1,1 do
-        local row = grid[origX + offX]
-        if row then
-            for offY = -1,1,1 do
-                local tile = row[origY + offY]
-                local isSamePos = (origX == 0 and origY == 0)
-                if tile and not isSamePos then
-                    table.insert(neighboors,Vector2.new(origX + offX, origY + offY))
-                end
-            end
-        end
-    end
-    return neighboors
 end
 
 local function checkIfTileIsBlocked(tile)
@@ -61,12 +43,8 @@ local function checkIfTileIsBlocked(tile)
     return false
 end  
 
-local function createNode(current: Vector2,orig: Vector2, target: Vector2)
-    return {
-        gCost = dist(current,orig),
-        fCost = dist(current,orig) + dist(current,target), -- G cost + H Cost 
-        Position = current,
-    }
+local function createVec2ID(target: Vector2)
+    return string.format("%d,%d",target.X,target.Y)
 end
 
 local function getNodeWithLowestCost(open)
@@ -82,33 +60,55 @@ local function getNodeWithLowestCost(open)
     return currentLowest
 end
 
-local function createVec2ID(target: Vector2)
-    return string.format("%d,%d",target.X,target.Y)
-end
-
 function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
+    local gridState = grid.Store:getState()
+
+    local Heap = HeapSort.new()
+
     local open = {}
     local closed = {}
-    local current = createNode(orig,orig,target)
-    open[createVec2ID(current)] = current --// ID is used because using the vector2 as a key doesn't work...
 
+    local current = Node.new(orig,orig,target,gridState)
+    local keysInOpen = 0
     local currentStep = 0
-    while true do
-        current = getNodeWithLowestCost(open)
+
+    local function addNodeTo(tbl: table, node: Node)
+        tbl[createVec2ID(node.Position)] = node
+        if (tbl == open) then
+            grid:SetHighlight(node.Position,true,"OpenColor")
+            Heap:Push(node.fCost,node)
+            keysInOpen += 1
+        else
+            grid:SetHighlight(node.Position,true,"ClosedColor")
+        end
+    end
+
+    local function removeNodeFrom(tbl: table, node: Node)
+        tbl[createVec2ID(node.Position)] = nil
+        if (tbl == open) then
+           keysInOpen -= 1
+        end
+    end
+
+    addNodeTo(open,current)
+
+    while (keysInOpen > 0) do
+        current = Heap.Values[1] --// This is the closest node!
+        Heap:PopTop()
 
         local currentPos = current.Position
-        local currentID = createVec2ID(currentPos)
-        open[currentID] = nil
-        closed[currentID] = current
+
+        removeNodeFrom(open,current)
+        addNodeTo(closed,current)
 
         if currentPos == target then
-            warn("Found!")
-            return open
+            self:DrawPath(target,closed,grid)
+            return closed
         end
 
-        for _,neighbourPos in pairs(getNeighboorPositions(grid,currentPos)) do
+        for _,neighbourPos in pairs(current:GetNeighbours()) do
             local neighbourID = createVec2ID(neighbourPos)
-            local neighbourTile = grid[neighbourPos.X][neighbourPos.Y]
+            local neighbourTile = gridState[neighbourPos.X][neighbourPos.Y]
 
             if checkIfTileIsBlocked(neighbourTile) or closed[neighbourID] then
                 continue
@@ -116,23 +116,35 @@ function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
 
             local newCostToNeighbour = current.gCost + dist(current.Position,neighbourPos)
             local neighbourGCost = dist(neighbourPos,orig)
-            if newCostToNeighbour < neighbourGCost or not closed[neighbourID] then
-                local neighbourNode = createNode(neighbourPos,orig,target)
+            if( newCostToNeighbour < neighbourGCost) or (not closed[neighbourID]) then
+                local neighbourNode = Node.new(neighbourPos,orig,target,gridState)
                 neighbourNode.Parent = current
+                
                 if not open[neighbourID] then
-                    open[neighbourID] = neighbourNode
+                    addNodeTo(open,neighbourNode)
+                    grid:SetHighlight(neighbourNode.Position,true,"OpenColor")
                 end
             end
         end
-        if current == target then
-            return --//Path has been found
-        end
         
-        if currentStep == 10 then
+        if currentStep == 500 then
             RunService.Heartbeat:Wait()
+            currentStep = 0
         end
-        current += 1
+        currentStep += 1
     end
+    warn("NO RESULT! No path to Target!")
+end
+
+function GridPathfinding:DrawPath(target,closed,grid)
+    local path = {}
+    local current = closed[createVec2ID(target)]
+    repeat 
+        current = current.Parent
+        table.insert(path,current)
+        grid:SetHighlight(current.Position,true,"PathColor")
+    until (current.Parent == nil) 
+    return path
 end
 
 function GridPathfinding:KnitStart()

@@ -26,12 +26,12 @@ function Grid.new(size: Vector2)
     return self
 end
 
-function  Grid:SetHighlight(target,newState)
-    self.Store:dispatch(GridActions.SetHighlight(target))
+function  Grid:SetHighlight(target,newState,themeColor)
+    self.Store:dispatch(GridActions.SetHighlight(target,newState,themeColor))
 end
 
-function Grid:SetAreaHighlight(target,radius,newState)
-    self.Store:dispatch(GridActions.SetAreaHighlight(target,radius,newState))
+function Grid:SetAreaHighlight(target,radius,newState,themeColor)
+    self.Store:dispatch(GridActions.SetAreaHighlight(target,radius,newState,themeColor))
 end
 
 function Grid:Destroy()

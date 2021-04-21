@@ -6,6 +6,7 @@ function Tile.new(pos)
     local self = setmetatable({
         ["Position"] = pos,
         ["Highlighted"] = false,
+        ["HighlightColor"] = "DefTileHighlightedColor",
     }, Tile)
     return self
 end

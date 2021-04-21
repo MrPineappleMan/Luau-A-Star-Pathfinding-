@@ -13,6 +13,7 @@ function Tile:init()
 
     self:setState({
         {
+            ["HighlightColor"] = props.HighlightColor,
             ["ThemeColor"] = props.ThemeColor,
             ["Highlighted"] = grid[pos.X][pos.Y].Highlighted,
         }
@@ -44,9 +45,9 @@ function Tile:setAreaTiles()
 
     if rightMouseButtonPressed then
         if (ctrlPressed) then
-            self.props.Grid:SetAreaHighlight(self.props.Position,5,false)
+            self.props.Grid:SetAreaHighlight(self.props.Position,5,false,"DefTileHighlightedColor")
         elseif  (not ctrlPressed) then
-            self.props.Grid:SetAreaHighlight(self.props.Position,5,true)
+            self.props.Grid:SetAreaHighlight(self.props.Position,5,true,"DefTileHighlightedColor")
         end
     end
 end
@@ -56,7 +57,7 @@ function Tile:render()
         Size = UDim2.new(1,0,1,0),
         AnchorPoint = Vector2.new(0,0),
         SizeConstraint = Enum.SizeConstraint.RelativeXX,
-        ThemeColor = self.state.Highlighted and  "TileHighlightedColor" or self.props.ThemeColor,
+        ThemeColor = self.state.Highlighted and self.state.HighlightColor or self.props.ThemeColor,
         LayoutOrder = self.props.LayoutOrder,
         [Roact.Event.InputBegan] =  function(rbx,input)
             self:setAreaTiles()
@@ -71,10 +72,11 @@ function Tile:didMount()
     local props = self.props
     props.Grid.Store.changed:connect(function(oldState,newState)
         local pos = props.Position
-        local newIsHighlighted = newState[pos.X][pos.Y].Highlighted
-        if newIsHighlighted ~= self.state.Highlighted then
+        local new = newState[pos.X][pos.Y]
+        if (new.Highlighted ~= self.state.Highlighted) or (new.HighlightColor ~= self.state.HighlightColor) then
             self:setState({
-                ["Highlighted"] = newIsHighlighted
+                ["Highlighted"] = new.Highlighted,
+                ["HighlightColor"] = new.HighlightColor,
             })
         end
     end)
