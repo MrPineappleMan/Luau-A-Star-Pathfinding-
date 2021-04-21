@@ -1,3 +1,3 @@
-# Luau2DEngine
-A grid based 2D "engine"
+# Luau A* Pathfinding
+A simple A* pathfinding test using Roact
 
