@@ -47,19 +47,6 @@ local function createVec2ID(target: Vector2)
     return string.format("%d,%d",target.X,target.Y)
 end
 
-local function getNodeWithLowestCost(open)
-    local currentLowest = math.huge
-
-    for _,node in pairs(open) do
-        local currentFCost = node.fCost
-        if currentFCost < currentLowest then
-            currentLowest = currentFCost
-        end
-    end
-
-    return currentLowest
-end
-
 function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
     local gridState = grid.Store:getState()
 
@@ -71,6 +58,11 @@ function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
     local current = Node.new(orig,orig,target,gridState)
     local keysInOpen = 0
     local currentStep = 0
+    local debugInfo = {
+        ["TotalIterations"] = 0,
+        ["TotalNeighbourIterations"] = 0,
+        ["TotalFramesWaited"] = 0,
+    }
 
     local function addNodeTo(tbl: table, node: Node)
         tbl[createVec2ID(node.Position)] = node
@@ -102,7 +94,10 @@ function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
         addNodeTo(closed,current)
 
         if currentPos == target then
+            warn(string.format("Path found from %d,%d to %d,%d!",orig.X,orig.Y,target.X,target.Y))
             self:DrawPath(target,closed,grid)
+            warn("Additional Info...")
+            warn(debugInfo)
             return closed
         end
 
@@ -125,15 +120,18 @@ function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
                     grid:SetHighlight(neighbourNode.Position,true,"OpenColor")
                 end
             end
+            debugInfo.TotalNeighbourIterations += 1
         end
         
         if currentStep == 500 then
             RunService.Heartbeat:Wait()
             currentStep = 0
+            debugInfo.TotalFramesWaited += 1
         end
+        debugInfo.TotalIterations += 1
         currentStep += 1
     end
-    warn("NO RESULT! No path to Target!")
+    warn(string.format("Pathfinding was not able to find a valid path from %d, %d to %d, %d",orig.X,orig.Y, target.X,target.Y))
 end
 
 function GridPathfinding:DrawPath(target,closed,grid)
@@ -144,6 +142,8 @@ function GridPathfinding:DrawPath(target,closed,grid)
         table.insert(path,current)
         grid:SetHighlight(current.Position,true,"PathColor")
     until (current.Parent == nil) 
+
+    warn(string.format("It will take %d steps to reach the target!",#path))
     return path
 end
 

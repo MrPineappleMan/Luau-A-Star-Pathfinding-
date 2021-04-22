@@ -2,6 +2,8 @@ local UserInputService = game:GetService("UserInputService")
 
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local Roact = require(Knit.Shared.Utils.Roact)
+local UIController = require(Knit.Client.Controllers.UIController)
+
 local e = Roact.createElement
 
 local Tile = Roact.Component:extend("Tile")
@@ -25,6 +27,8 @@ local function checkValidInputs()
     local keysPressed = UserInputService:GetKeysPressed()
     local rightButtonPressed = false
     local ctrlPressed = false
+    local qPressed = false
+    local ePressed = false
 
     for _,input in pairs(buttonsPressed) do
         if input.UserInputType.Name == "MouseButton2" then
@@ -34,14 +38,24 @@ local function checkValidInputs()
     for _,input in pairs(keysPressed) do
         if input.KeyCode == Enum.KeyCode.LeftControl then
             ctrlPressed = true
+        elseif  input.KeyCode == Enum.KeyCode.Q then
+            qPressed = true
+        elseif  input.KeyCode == Enum.KeyCode.E then
+            ePressed = true
         end
     end
 
-    return rightButtonPressed, ctrlPressed
+    return rightButtonPressed, ctrlPressed,qPressed,ePressed
 end
 
 function Tile:setAreaTiles()
-    local rightMouseButtonPressed, ctrlPressed = checkValidInputs()
+    local rightMouseButtonPressed, ctrlPressed,qPressed,ePressed = checkValidInputs()
+
+    if qPressed then
+        UIController:SetStart(self.props.Position)
+    elseif  ePressed then
+        UIController:SetEnd(self.props.Position)
+    end
 
     if rightMouseButtonPressed then
         if (ctrlPressed) then
