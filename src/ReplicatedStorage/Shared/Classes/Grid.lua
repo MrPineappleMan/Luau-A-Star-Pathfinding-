@@ -26,6 +26,10 @@ function Grid.new(size: Vector2)
     return self
 end
 
+function Grid:ResetHighlight()
+    self.Store:dispatch(GridActions.ResetHighlight())
+end
+
 function  Grid:SetHighlight(target,newState,themeColor)
     self.Store:dispatch(GridActions.SetHighlight(target,newState,themeColor))
 end

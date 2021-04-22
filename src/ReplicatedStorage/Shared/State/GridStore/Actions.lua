@@ -23,4 +23,10 @@ function BoardActions.SetAreaHighlight(target,radius,newState,highlightColor)
 end
 
 
+function  BoardActions.ResetHighlight()
+    return {
+        ["type"] = "ResetHighlight",
+    }
+end
+
 return BoardActions

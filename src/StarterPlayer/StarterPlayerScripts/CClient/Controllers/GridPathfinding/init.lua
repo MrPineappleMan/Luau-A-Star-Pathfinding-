@@ -123,7 +123,7 @@ function GridPathfinding:FindPath(orig: Vector2, target: Vector2,grid: Grid)
             debugInfo.TotalNeighbourIterations += 1
         end
         
-        if currentStep == 500 then
+        if currentStep == 100 then
             RunService.Heartbeat:Wait()
             currentStep = 0
             debugInfo.TotalFramesWaited += 1

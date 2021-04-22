@@ -3,7 +3,7 @@
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local GridActions = require(script.Parent.Actions)
 
-local ReducerFuncs = {}
+local Reducers = {}
 
 local function shallowCopyState(oldState)
     local newState = {}
@@ -14,8 +14,18 @@ local function shallowCopyState(oldState)
     return newState
 end
 
+function Reducers.ResetHighlight(state,action)
+    local newState = shallowCopyState(state)
+    for _,col in pairs(newState) do
+        for _,tile in pairs(col) do
+            tile.Highlighted = false
+            tile.HighlightColor = "DefTileHighlightedColor"
+        end
+    end
+    return newState
+end
 
-function ReducerFuncs.SetHighlight(state, action)
+function Reducers.SetHighlight(state, action)
     local newState = shallowCopyState(state)
     local target = action.target
     local targetTile = newState[target.X][target.Y]
@@ -24,7 +34,7 @@ function ReducerFuncs.SetHighlight(state, action)
     return newState
 end
 
-function ReducerFuncs.SetAreaHighlight(state, action)
+function Reducers.SetAreaHighlight(state, action)
     local newState = shallowCopyState(state)
     local target = action.target
 
@@ -47,4 +57,4 @@ function ReducerFuncs.SetAreaHighlight(state, action)
 end
 
 
-return ReducerFuncs
+return Reducers

@@ -28,10 +28,14 @@ function UIController:KnitStart()
         })
     ,game.Players.LocalPlayer.PlayerGui)
     UserInputService.InputBegan:Connect(function(input,gpe)
-        if (input.KeyCode == Enum.KeyCode.Return)  and (not gpe) then
-            SpeedTest.TimeFunc(function()
-                Pathfinding:FindPath(self.StartPosition,self.EndPosition,test)
-            end)
+        if not gpe then
+            if (input.KeyCode == Enum.KeyCode.Return) then
+                SpeedTest.TimeFunc(function()
+                    Pathfinding:FindPath(self.StartPosition,self.EndPosition,test)
+                end)
+            elseif input.KeyCode == Enum.KeyCode.One then
+                test:ResetHighlight()
+            end
         end
     end)
 end
